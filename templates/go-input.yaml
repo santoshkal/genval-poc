@@ -1,0 +1,50 @@
+dockerfile:
+- stage: 0
+  instructions:
+# Use latest-dev for the latest development version
+  - from: "cgr.dev/chainguard/go:latest As builder"
+  # Set environment variables for build
+  - env:
+    - "APP_HOME=/app"
+  # Create a non-root user for the build
+  - run:
+    - "useradd -m -s /bin/bash -d $APP_HOME myappuser"
+  # Set the working directory
+  - workdir: "$APP_HOME"
+  # Copy go.mod and go.sum to install dependencies
+  - copy:
+    - "go.mod go.sum $APP_HOME/"
+  # Install build and application dependencies
+  - run:
+    - apt-get update
+    - apt-get clean
+    - go mod download
+  # Copy the application source code
+  - copy:
+    - src/ $APP_HOME/src/
+  # Build the application
+  - run:
+    - "CGO_ENABLED=0 go build -o myapp $APP_HOME/src/main.go"
+# Stage 2: Runtime environment
+- stage: 1
+  instructions:
+  - from: "cgr.dev/chainguard/static:latest"
+  # Set environment variables for runtime
+  - env:
+    - "APP_USER=myappuser"
+    - "APP_HOME=/app"
+  # Create a non-root user to run the application
+  - run:
+    - "useradd -m -s /bin/bash -d $APP_HOME $APP_USER"
+  # Set the working directory
+  - workdir: "$APP_HOME"
+  # Copy the compiled application from the build stage
+  - copy:
+    - --from=builder $APP_HOME/myapp $APP_HOME/myapp
+  - expose:
+    - "8080"
+# Drop root privileges and run the application as the non-root user
+  - user: "$APP_USER"
+  # Set the entry point for the container
+  - cmd:
+    - "./myapp"

@@ -1,0 +1,106 @@
+package test
+
+import (
+	"fmt"
+	"gopkg.in/yaml.v3"
+	"os"
+	"strings"
+)
+
+func test() {
+	if len(os.Args) != 3 {
+		fmt.Println("Usage: go run main.go input.yaml output.Dockerfile")
+		return
+	}
+
+	inputPath := os.Args[1]
+	outputPath := os.Args[2]
+
+	inputData, err := os.ReadFile(inputPath)
+	if err != nil {
+		fmt.Println("Error reading input YAML:", err)
+		return
+	}
+
+	var data struct {
+		Dockerfile []struct {
+			Stage        int                      `yaml:"stage"`
+			Instructions []map[string]interface{} `yaml:"instructions"`
+		} `yaml:"dockerfile"`
+	}
+
+	err = yaml.Unmarshal(inputData, &data)
+	if err != nil {
+		fmt.Println("Error parsing YAML:", err)
+		return
+	}
+
+	var dockerfileContent strings.Builder
+	for _, stageData := range data.Dockerfile {
+		stageNumber := stageData.Stage
+		instructions := stageData.Instructions
+
+		if stageNumber != 0 {
+			dockerfileContent.WriteString(fmt.Sprintf("# STAGE %d\n", stageNumber))
+		}
+
+		for _, instruction := range instructions {
+			for key, value := range instruction {
+				instructionLine := formatInstruction(key, value)
+				if instructionLine != "" {
+					dockerfileContent.WriteString(fmt.Sprintf("  %s\n", instructionLine))
+				}
+			}
+		}
+	}
+
+	outputData := []byte(dockerfileContent.String())
+	err = os.WriteFile(outputPath, outputData, 0644)
+	if err != nil {
+		fmt.Println("Error writing Dockerfile:", err)
+		return
+	}
+
+	fmt.Println("Dockerfile generated successfully!")
+}
+
+func formatInstruction(key string, value interface{}) string {
+	if strings.HasPrefix(key, "#") {
+		return key
+	}
+
+	if strings.HasPrefix(key, "STAGE") {
+		return "# " + key
+	}
+
+	switch strings.ToLower(key) {
+	case "run", "copy":
+		values := convertToStrings(value)
+		if len(values) > 1 {
+			joinedValues := strings.Join(values, " \\\n            && ")
+			return fmt.Sprintf("%s %s", strings.ToUpper(key), joinedValues)
+		} else if len(values) == 1 {
+			return fmt.Sprintf("%s %s", strings.ToUpper(key), values[0])
+		}
+	default:
+		valueStr := fmt.Sprintf("%v", value)
+		return fmt.Sprintf("%s %s", strings.ToUpper(key), valueStr)
+	}
+
+	return ""
+}
+
+func convertToStrings(value interface{}) []string {
+	var result []string
+
+	switch v := value.(type) {
+	case string:
+		result = append(result, v)
+	case []interface{}:
+		for _, item := range v {
+			result = append(result, fmt.Sprintf("%v", item))
+		}
+	}
+
+	return result
+}

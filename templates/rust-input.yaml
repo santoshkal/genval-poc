@@ -1,0 +1,44 @@
+dockerfile:
+- stage: 0
+  instructions:
+# Use latest-dev for the latest development version
+  - from: "cgr.dev/chainguard/clang:latest"
+# Set an environment variable for the app home directory
+  - env: "APP_HOME=/app"  
+# Install gcc and clean-up to reduce image size and Create a user for the app
+  - run:   
+    - "apt-get update"
+    - "apt-get install -y gcc"
+    - "apt-get clean"
+    - "useradd -m -s /bin/bash -d $APP_HOME myappuser"
+# Set the working directory to /server
+  - workdir: "$APP_HOME" 
+# Copy the source code and Makefile to the working directory
+  - copy: 
+    - "src/ $APP_HOME/src/" 
+    - "Makefile $APP_HOME/" 
+# Build the app
+  - run: 
+    - make -C $APP_HOME 
+  
+- stage: 1
+  instructions:
+  - from: "cgr.dev/chainguard/static:latest"
+# Set the user to the one created in stage 0 and set app home directory
+  - env:
+    - APP_USER=myappuser 
+    - APP_HOME=/app 
+# Create a user for the app
+  - run:
+    - useradd -m -s /bin/bash -d $APP_HOME $APP_USER  
+# Set the working directory 
+  - workdir: "$APP_HOME"
+# Copy the app binary to the working directory
+  - copy:
+    - $APP_HOME/src/myapp $APP_HOME/src/myapp 
+# Set the user to the one created in stage 0
+  - user: $APP_USER 
+# Run the app
+  - cmd:
+    - "./src/myapp" 
+    
