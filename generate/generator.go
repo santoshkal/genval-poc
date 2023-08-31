@@ -1,4 +1,3 @@
-// generate/generator.go
 package generate
 
 import (

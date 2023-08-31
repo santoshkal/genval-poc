@@ -1,5 +1,16 @@
 package dockerfile_validation
 
+# # Define policy rules as a list of policies to evaluate
+# policy_rules = [
+#     untrusted_base_image,
+#     latest_base_image,
+#     # warning_system_packages_upgrade,
+#     any_user,
+#     deny_root_user,
+#     deny_sudo,
+#     # ... other policies ...
+# ]
+
 
 
 untrusted_base_image{
@@ -14,8 +25,15 @@ latest_base_image{
     contains(val1[1], "latest")
 }
 
+# # Do not upgrade your system packages
+# warning_system_packages_upgrade{
+#     input[i].cmd == "run"
+#     val2 := concat(" ", input[i].value)
+#     matches := regex.match(".*?(apk|yum|dnf|apt|pip).+?(install|[dist-|check-|group]?up[grade|date]).*", val2)
+#     matches == true
+# }
 
-# Do not use root user
+# Do not use any user
 deny_root_user {
     input[i].cmd == "user"
     val2:= input[i].value
@@ -29,23 +47,6 @@ deny_sudo{
     val3:= input[i].value
     not contains(val3, "sudo")
 }
-
-# Avoid using cached layers CIS 4.7
-deny_caching{
-    input[i].cmd == "run"
-    val4:= input[i].value
-    matches := regex.match(".*?(apk|yum|dnf|apt|pip).+?(install|[dist-|check-|group]?up[grade|date]).*", val4)
-    matches == true
-    contains(val4, "--no-cache")
-}
-
-# Ensure that COPY is used instead of ADD CIS 4.9
-deny_add{
-    input[i].cmd != "add"
-}
-
-
-# Ensure secrets are not stored CIS 4.10
 
 # deny_root_user{
 # forbidden_users := [

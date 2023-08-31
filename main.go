@@ -48,22 +48,12 @@ func main() {
 		return
 	}
 
-	// Validate the Dockerfile using the custom package
-	// Convert Dockerfile content to JSON format
-	// dockerfileJSON, err := json.Marshal(outputData)
-	// if err != nil {
-	// 	fmt.Println("Error converting Dockerfile content to JSON:", err)
-	// 	return
-	// }
-
-	// fmt.Printf("Dockerfile JSON: %s\n", outputData)
-	// Validate the Dockerfile using the custom package
 	output, err := validate.ValidateDockerfile(outputData)
 	if err != nil {
 		fmt.Println("Error validating Dockerfile:", err)
 		return
 	}
 	// Process the OPA output as needed
-	fmt.Println("OPA Output:\n", output)
+	fmt.Printf("OPA Output:\n%v\n", output)
 	fmt.Println("Dockerfile generated and validated successfully!")
 }

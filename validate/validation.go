@@ -74,8 +74,8 @@ func ValidateDockerfile(dockerfileJSON []byte) (string, error) {
 	}
 	// Process the JSON output as needed
 	result := output.String()
+
 	// Parse the OPA JSON output
-	// fmt.Println("OPA Output:", result)
 	var opaOutput map[string]bool
 	if err := json.Unmarshal([]byte(result), &opaOutput); err != nil {
 		return "", fmt.Errorf("error parsing OPA output: %w", err)
@@ -83,7 +83,7 @@ func ValidateDockerfile(dockerfileJSON []byte) (string, error) {
 
 	// Define the list of policies
 	// Add more policies as needed
-	policies := []string{"latest_base_image", "untrusted_base_image", "deny_root_user", "deny_sudo"}
+	policies := []string{"latest_base_image", "untrusted_base_image", "deny_root_user", "deny_sudo", "deny_caching", "deny_add"}
 
 	// Format the output indicating which policies passed and which failed
 	var formattedOutput string
