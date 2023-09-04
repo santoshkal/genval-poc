@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/santoshkal/genval-poc/generate"
 	"github.com/santoshkal/genval-poc/validate"
 )
@@ -20,12 +18,7 @@ func main() {
 	inputPath := os.Args[1]
 	outputPath := os.Args[2]
 
-	inputData, err := os.ReadFile(inputPath)
-	if err != nil {
-		fmt.Println("Error reading input YAML:", err)
-		return
-	}
-
+	// Use ParseInputFile to read and unmarshal the input file
 	var data struct {
 		Dockerfile []struct {
 			Stage        int                      `yaml:"stage"`
@@ -33,16 +26,18 @@ func main() {
 		} `yaml:"dockerfile"`
 	}
 
-	err = yaml.Unmarshal(inputData, &data)
+	err := generate.ParseInputFile(inputPath, &data)
 	if err != nil {
-		fmt.Println("Error parsing YAML:", err)
+		fmt.Println("Error:", err)
 		return
 	}
+
 	if err := validate.ValidateYAML(); err != nil {
 		fmt.Printf("Validation error: %v\n", err)
 	} else {
 		fmt.Println("Validation successful.")
 	}
+
 	dockerfileContent := generate.GenerateDockerfileContent(&data)
 
 	outputData := []byte(dockerfileContent)
@@ -58,6 +53,6 @@ func main() {
 		return
 	}
 	// Process the OPA output as needed
-	fmt.Println("Dockerfile generated and validated successfully!\n")
+	fmt.Println("Dockerfile generated and validated successfully!")
 	fmt.Printf("OPA Evaluation:\n%v\n", output)
 }
