@@ -1,7 +1,8 @@
 dockerfile:
 - stage: 0
   instructions:
-  - from: "cgr.dev/chainguard/go:latest as builder"
+  - from:
+    - "cgr.dev/chainguard/go:latest as builder"
   - env: "APP_HOME=/app"
   - run:
     - "useradd -m -s /bin/bash -d $APP_HOME myappuser"
@@ -28,7 +29,9 @@ dockerfile:
     - "useradd -m -s /bin/bash -d $APP_HOME $APP_USER"
   - workdir: "$APP_HOME"
   - copy:
-    - --from builder $APP_HOME/myapp $APP_HOME/myapp
+    - --from=builder $APP_HOME/myapp $APP_HOME/myapp
   - user: "$APP_USER"
+  - entrypoint:
+    - "./myapp"
   - cmd:
     - "./myapp"

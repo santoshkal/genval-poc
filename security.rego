@@ -8,11 +8,11 @@ untrusted_base_image{
     val[0] == "cgr.dev"
 }
 
-latest_base_image{
-    input[i].cmd == "from"
-    val1 := split(input[i].value, ":")
-    contains(val1[1], "latest")
-}
+# latest_base_image{
+#     input[i].cmd == "from"
+#     val1 := split(input[i].value, ":")
+#     contains(val1[1], "latest")
+# }
 
 
 # Do not use root user
@@ -44,6 +44,13 @@ deny_add{
     input[i].cmd != "add"
 }
 
+# Ensure ADD does not include unpack archives or download files 
+deny_image_expansion{
+	input[_].cmd == "add"
+	val5 := input[_].value
+	words := regex.match(".*?(curl|wget|.tar|.tar.).*", val5)
+	words != true
+}
 
 # Ensure secrets are not stored CIS 4.10
 

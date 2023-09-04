@@ -9,7 +9,5 @@ package main
 				{copy: [...string]},
 				{run: [...string]},
 				{cmd: [...string]},
-				// Nonroot == nonroot
-				{user: "=~" }
 				...]
 }]

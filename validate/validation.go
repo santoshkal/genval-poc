@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// TODO: Update the path to the OPA binary using embed.FS
 const opaBinaryPath = "./opa"
 
 // const opaBinaryName = "opa"
@@ -83,16 +84,16 @@ func ValidateDockerfile(dockerfileJSON []byte) (string, error) {
 
 	// Define the list of policies
 	// Add more policies as needed
-	policies := []string{"latest_base_image", "untrusted_base_image", "deny_root_user", "deny_sudo", "deny_caching", "deny_add"}
+	policies := []string{"latest_base_image", "untrusted_base_image", "deny_root_user", "deny_sudo", "deny_caching", "deny_add", "deny_image_expansion"}
 
 	// Format the output indicating which policies passed and which failed
 	var formattedOutput string
 	for _, policy := range policies {
 		passed, exists := opaOutput[policy]
 		if !exists || !passed {
-			formattedOutput += fmt.Sprintf("Policy '%s' failed.\n", policy)
+			formattedOutput += fmt.Sprintf("Policy '%s:' failed.\n", policy)
 		} else {
-			formattedOutput += fmt.Sprintf("Policy '%s' passed.\n", policy)
+			formattedOutput += fmt.Sprintf("Policy '%s:' passed.\n", policy)
 		}
 	}
 

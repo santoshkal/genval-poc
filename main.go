@@ -38,7 +38,11 @@ func main() {
 		fmt.Println("Error parsing YAML:", err)
 		return
 	}
-
+	if err := validate.ValidateYAML(); err != nil {
+		fmt.Printf("Validation error: %v\n", err)
+	} else {
+		fmt.Println("Validation successful.")
+	}
 	dockerfileContent := generate.GenerateDockerfileContent(&data)
 
 	outputData := []byte(dockerfileContent)
@@ -54,6 +58,6 @@ func main() {
 		return
 	}
 	// Process the OPA output as needed
-	fmt.Printf("OPA Output:\n%v\n", output)
-	fmt.Println("Dockerfile generated and validated successfully!")
+	fmt.Println("Dockerfile generated and validated successfully!\n")
+	fmt.Printf("OPA Evaluation:\n%v\n", output)
 }
