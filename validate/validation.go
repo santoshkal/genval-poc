@@ -1,24 +1,28 @@
 package validate
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 	"os"
-	"os/exec"
 	"strings"
+
+	"github.com/open-policy-agent/opa/rego"
 )
 
-// TODO: Update the path to the OPA binary using embed.FS
-const opaBinaryPath = "./opa"
+const (
+	DockerfilePolicy  = "./policies/docker-file.rego"
+	DockerfilePackage = "data.dockerfile_validation"
+)
 
-// const opaBinaryName = "opa"
-
+// DockerfileInstruction represents a Dockerfile instruction with Cmd and Value.
 type DockerfileInstruction struct {
 	Cmd   string `json:"cmd"`
 	Value string `json:"value"`
 }
+
+// ...
 
 func ParseDockerfileContent(content string) []DockerfileInstruction {
 	lines := strings.Split(content, "\n")
@@ -42,60 +46,62 @@ func ParseDockerfileContent(content string) []DockerfileInstruction {
 	return instructions
 }
 
-func ValidateDockerfile(dockerfileJSON []byte) (string, error) {
-	dockerfileInstructions := ParseDockerfileContent(string(dockerfileJSON))
-
-	dockerfileJSON, err := json.Marshal(dockerfileInstructions)
+// ValidateDockerfileUsingRego validates a Dockerfile using Rego.
+func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
+	// Read Rego policy code from file
+	regoPolicyCode, err := os.ReadFile(regoPolicyPath)
 	if err != nil {
-		return "", fmt.Errorf("error converting to JSON: %w", err)
+		return fmt.Errorf("error reading rego policy: %v", err)
 	}
-	tempFile, err := os.CreateTemp("", "dockerfile.json")
+
+	// Prepare Rego input data
+	dockerfileInstructions := ParseDockerfileContent(dockerfileContent)
+
+	jsonData, err := json.Marshal(dockerfileInstructions)
 	if err != nil {
-		return "", fmt.Errorf("error creating temporary file: %w", err)
+		fmt.Println("Error converting to JSON:", err)
+		return nil
 	}
-	defer os.Remove(tempFile.Name())
 
-	// Write the Dockerfile JSON to the temporary file
-	_, err = tempFile.Write(dockerfileJSON)
+	var commands []map[string]string
+	err = json.Unmarshal([]byte(jsonData), &commands)
 	if err != nil {
-		return "", fmt.Errorf("error writing Dockerfile JSON to temporary file: %w", err)
-	}
-	tempFile.Close()
-
-	query := "data.dockerfile_validation"
-
-	cmd := exec.Command(opaBinaryPath, "eval", query, "--data", "./security.rego", "--format", "pretty", "--input", tempFile.Name())
-	cmd.Stdin = io.Reader(bytes.NewReader(dockerfileJSON))
-	cmd.Stderr = os.Stderr
-	var output bytes.Buffer
-	cmd.Stdout = &output
-
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("error running OPA: %w", err)
-	}
-	// Process the JSON output as needed
-	result := output.String()
-
-	// Parse the OPA JSON output
-	var opaOutput map[string]bool
-	if err := json.Unmarshal([]byte(result), &opaOutput); err != nil {
-		return "", fmt.Errorf("error parsing OPA output: %w", err)
+		fmt.Println("Error:", err)
+		return err
 	}
 
-	// Define the list of policies
-	// Add more policies as needed
-	policies := []string{"latest_base_image", "untrusted_base_image", "deny_root_user", "deny_sudo", "deny_caching", "deny_add", "deny_image_expansion"}
+	// Create regoQuery for evaluation
+	regoQuery := rego.New(
+		rego.Query(DockerfilePackage),
+		rego.Module(DockerfilePolicy, string(regoPolicyCode)),
+		rego.Input(commands),
+	)
 
-	// Format the output indicating which policies passed and which failed
-	var formattedOutput string
-	for _, policy := range policies {
-		passed, exists := opaOutput[policy]
-		if !exists || !passed {
-			formattedOutput += fmt.Sprintf("Policy '%s:' failed.\n", policy)
+	// Evaluate the Rego query
+	rs, err := regoQuery.Eval(context.Background())
+	if err != nil {
+		log.Fatal("Error evaluating query:", err)
+	}
+
+	// Iterate over the resultSet and print the result metadata
+	for _, result := range rs {
+		if len(result.Expressions) > 0 {
+			keys := result.Expressions[0].Value.(map[string]interface{})
+			for key, value := range keys {
+				if value != true {
+					fmt.Printf("Policy: %s failed\n", key)
+				} else {
+					fmt.Printf("Policy: %s passed\n", key)
+				}
+			}
 		} else {
-			formattedOutput += fmt.Sprintf("Policy '%s:' passed.\n", policy)
+			fmt.Println("No policies passed")
 		}
 	}
 
-	return formattedOutput, nil
+	if err != nil {
+		return fmt.Errorf("error evaluating Rego: %v", err)
+	}
+
+	return nil
 }

@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -8,6 +7,8 @@ import (
 	"github.com/santoshkal/genval-poc/generate"
 	"github.com/santoshkal/genval-poc/validate"
 )
+
+// const DockerfilePolicy = "./policies/docker-file.rego"
 
 func main() {
 	if len(os.Args) != 3 {
@@ -32,11 +33,11 @@ func main() {
 		return
 	}
 
-	if err := validate.ValidateYAML(); err != nil {
-		fmt.Printf("Validation error: %v\n", err)
-	} else {
-		fmt.Println("Validation successful.")
-	}
+	// if err := validate.ValidateYAML(); err != nil {
+	// 	fmt.Printf("Validation error: %v\n", err)
+	// } else {
+	// 	fmt.Println("Validation successful.")
+	// }
 
 	dockerfileContent := generate.GenerateDockerfileContent(&data)
 
@@ -46,13 +47,14 @@ func main() {
 		fmt.Println("Error writing Dockerfile:", err)
 		return
 	}
+	fmt.Printf("Generated Dockerfile saved to: %s\n", outputPath)
 
-	output, err := validate.ValidateDockerfile(outputData)
+	err = validate.ValidateDockerfile(string(outputData), validate.DockerfilePolicy)
+	// fmt.Printf("Dockerfile JSON: %s\n", generatedDockerfileContent)
 	if err != nil {
-		fmt.Println("Error validating Dockerfile:", err)
+		fmt.Println("Dockerfile validation failed:", err)
 		return
+	} else {
+		fmt.Println("Dockerfile validation succeeded!")
 	}
-	// Process the OPA output as needed
-	fmt.Println("Dockerfile generated and validated successfully!")
-	fmt.Printf("OPA Evaluation:\n%v\n", output)
 }
