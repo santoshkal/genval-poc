@@ -3,10 +3,12 @@ dockerfile:
   instructions:
   - from:
     - "cgr.dev/chainguard/go:latest as builder"
-  - env: "APP_HOME=/app"
+  - env:
+    - "APP_HOME=/app"
   - run:
     - "useradd -m -s /bin/bash -d $APP_HOME myappuser"
-  - workdir: "$APP_HOME"
+  - workdir:
+    - "$APP_HOME"
   - run:
     - apt-get update
     - apt-get clean
@@ -17,19 +19,34 @@ dockerfile:
     - src/ $APP_HOME/src/
   - run:
     - "CGO_ENABLED=0 go build -o myapp $APP_HOME/src/main.go"
+  
 
 
 - stage: 1
   instructions:
-  - from: "cgr.dev/chainguard/static:latest"
+  - from:
+    - "cgr.dev/chainguard/static:latest"
   - env:
     - "APP_USER=myappuser"
     - "APP_HOME=/app"
   - run:
     - "useradd -m -s /bin/bash -d $APP_HOME $APP_USER"
-  - workdir: "$APP_HOME"
+  - workdir:
+    - "$APP_HOME"
   - copy:
     - --from=builder $APP_HOME/myapp $APP_HOME/myapp
-  - user: "$APP_USER"
+  - user:
+    - "$APP_USER"
   - entrypoint:
     - "./myapp"
+
+
+
+# Check for entrypoint in last stage
+
+# Check multiple FROM in yaml
+
+# Length of STAGE > 1
+
+# replace ADD to COPY 
+

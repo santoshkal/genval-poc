@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Validate the YAML using OPA
-	err = validate.ValidateYAMLUsingRego(string(yamlContent), validate.InputPolicy)
+	err = validate.ValidateYAML(string(yamlContent), validate.InputPolicy)
 	if err != nil {
 		log.Fatalf("Validation error: %v", err)
 	}

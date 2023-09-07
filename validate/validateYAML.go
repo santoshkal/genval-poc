@@ -15,10 +15,7 @@ const (
 	InputPackage = "data.validate_input"
 )
 
-type DockerInstruction struct {
-	Cmd   string   `yaml:"cmd"`
-	Value []string `yaml:"value"`
-}
+type DockerInstruction map[string][]string
 
 type DockerStage struct {
 	Instructions []DockerInstruction `yaml:"instructions"`
@@ -29,18 +26,20 @@ type DockerfileYAML struct {
 	Dockerfile []DockerStage `yaml:"dockerfile"`
 }
 
-func ParseDockerfileFromYAML(yamlContent string) (*DockerfileYAML, error) {
+func ParseYAML(yamlContent string) (*DockerfileYAML, error) {
+
 	var dockerfileYAML DockerfileYAML
 	err := yaml.Unmarshal([]byte(yamlContent), &dockerfileYAML)
 	if err != nil {
 		return nil, err
 	}
+	// fmt.Printf("DockerfileYAML: %v\n TYPE: %T", dockerfileYAML, dockerfileYAML)
 	return &dockerfileYAML, nil
 }
 
-func ValidateYAMLUsingRego(yamlContent string, regoPolicyPath string) error {
+func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	// Parse the YAML content
-	dockerfileYAML, err := ParseDockerfileFromYAML(yamlContent)
+	dockerfileYAML, err := ParseYAML(yamlContent)
 	if err != nil {
 		return fmt.Errorf("error parsing YAML: %v", err)
 	}
@@ -57,6 +56,7 @@ func ValidateYAMLUsingRego(yamlContent string, regoPolicyPath string) error {
 	if err != nil {
 		return fmt.Errorf("error converting dockerfileYAML to JSON: %v", err)
 	}
+
 	err = json.Unmarshal(yamlBytes, &inputMap)
 	if err != nil {
 		return fmt.Errorf("error converting JSON to map: %v", err)
