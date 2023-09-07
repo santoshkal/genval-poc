@@ -89,9 +89,9 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 			keys := result.Expressions[0].Value.(map[string]interface{})
 			for key, value := range keys {
 				if value != true {
-					fmt.Printf("Policy: %s failed\n", key)
+					fmt.Printf("Dockerfile validation policy: %s failed\n", key)
 				} else {
-					fmt.Printf("Policy: %s passed\n", key)
+					fmt.Printf("Dockerfile validation policy: %s passed\n", key)
 				}
 			}
 		} else {

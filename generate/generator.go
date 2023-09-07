@@ -61,6 +61,9 @@ func GenerateDockerfileContent(data *struct {
 		lastInstruction := ""
 		for _, instruction := range instructions {
 			for key, value := range instruction {
+				if key == "FROM" && len(key) > 1 {
+					fmt.Println("Can not have more than one FROM instruction")
+				}
 				instructionLines := formatInstruction(key, value)
 				if len(instructionLines) > 0 {
 					if key == "RUN" || key == "COPY" {

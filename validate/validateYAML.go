@@ -83,6 +83,7 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 			for key, value := range keys {
 				if value != true {
 					fmt.Printf("Policy: %s failed\n", key)
+					return fmt.Errorf("policy %s failed", key)
 				} else {
 					fmt.Printf("Policy: %s passed\n", key)
 				}

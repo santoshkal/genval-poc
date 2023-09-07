@@ -43,6 +43,7 @@ func main() {
 	err = validate.ValidateYAML(string(yamlContent), validate.InputPolicy)
 	if err != nil {
 		log.Fatalf("Validation error: %v", err)
+		return
 	}
 
 	dockerfileContent := generate.GenerateDockerfileContent(&data)
