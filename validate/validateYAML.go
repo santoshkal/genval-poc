@@ -33,7 +33,6 @@ func ParseYAML(yamlContent string) (*DockerfileYAML, error) {
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Printf("DockerfileYAML: %v\n TYPE: %T", dockerfileYAML, dockerfileYAML)
 	return &dockerfileYAML, nil
 }
 
@@ -62,7 +61,7 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 		return fmt.Errorf("error converting JSON to map: %v", err)
 	}
 
-	fmt.Printf("inputMap: %v\n", inputMap)
+	// fmt.Printf("inputMap: %v\n", inputMap)
 
 	// Create Rego for query and evaluation
 	regoQuery := rego.New(

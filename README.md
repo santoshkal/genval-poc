@@ -4,6 +4,4 @@
 
 # TODO
 
-- Validate user input using `OPA/Rego` 
- 
-
+- Use logrus for logs
