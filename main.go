@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/santoshkal/genval-poc/generate"
@@ -33,11 +34,16 @@ func main() {
 		return
 	}
 
-	// if err := validate.ValidateYAML(); err != nil {
-	// 	fmt.Printf("Validation error: %v\n", err)
-	// } else {
-	// 	fmt.Println("Validation successful.")
-	// }
+	yamlContent, err := os.ReadFile(inputPath)
+	if err != nil {
+		log.Fatalf("Error reading YAML file: %v", err)
+	}
+
+	// Validate the YAML using OPA
+	err = validate.ValidateYAMLUsingRego(string(yamlContent), validate.InputPolicy)
+	if err != nil {
+		log.Fatalf("Validation error: %v", err)
+	}
 
 	dockerfileContent := generate.GenerateDockerfileContent(&data)
 

@@ -1,48 +1,96 @@
 package validate
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"os"
 
-	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/cuecontext"
+	"github.com/open-policy-agent/opa/rego"
+	"gopkg.in/yaml.v2"
 )
 
-func ValidateYAML() error {
-	ctx := cuecontext.New()
+const (
+	InputPolicy  = "./policies/input-yaml.rego"
+	InputPackage = "data.validate_input"
+)
 
-	// load schema.cue
-	schemaBytes, err := os.ReadFile("input1.cue")
+type DockerInstruction struct {
+	Cmd   string   `yaml:"cmd"`
+	Value []string `yaml:"value"`
+}
+
+type DockerStage struct {
+	Instructions []DockerInstruction `yaml:"instructions"`
+	Stage        int                 `yaml:"stage"`
+}
+
+type DockerfileYAML struct {
+	Dockerfile []DockerStage `yaml:"dockerfile"`
+}
+
+func ParseDockerfileFromYAML(yamlContent string) (*DockerfileYAML, error) {
+	var dockerfileYAML DockerfileYAML
+	err := yaml.Unmarshal([]byte(yamlContent), &dockerfileYAML)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	schema := ctx.CompileBytes(schemaBytes, cue.Filename("input1.cue"))
-	if err := schema.Err(); err != nil {
-		return err
-	}
+	return &dockerfileYAML, nil
+}
 
-	// load input.json
-	dataBytes, err := os.ReadFile("input1.json")
+func ValidateYAMLUsingRego(yamlContent string, regoPolicyPath string) error {
+	// Parse the YAML content
+	dockerfileYAML, err := ParseDockerfileFromYAML(yamlContent)
 	if err != nil {
-		return err
-	}
-	data := ctx.CompileBytes(dataBytes, cue.Filename("input1.json"))
-	if err := data.Err(); err != nil {
-		return err
+		return fmt.Errorf("error parsing YAML: %v", err)
 	}
 
-	// use #Dockerfile from the schema
-	schema = schema.LookupPath(cue.ParsePath("#Dockerfile"))
-	if err := schema.Err(); err != nil {
-		return err
+	// Read Rego policy code from file
+	regoPolicyCode, err := os.ReadFile(regoPolicyPath)
+	if err != nil {
+		return fmt.Errorf("error reading rego policy: %v", err)
 	}
 
-	// unify the schema with the input and validate, like `cue vet`
-	v := schema.Unify(data)
-	if err := v.Err(); err != nil {
-		return err
+	// Convert the dockerfileYAML struct to a map for rego input
+	inputMap := make(map[string]interface{})
+	yamlBytes, err := json.Marshal(dockerfileYAML)
+	if err != nil {
+		return fmt.Errorf("error converting dockerfileYAML to JSON: %v", err)
 	}
-	if err := v.Validate(); err != nil {
-		return err
+	err = json.Unmarshal(yamlBytes, &inputMap)
+	if err != nil {
+		return fmt.Errorf("error converting JSON to map: %v", err)
+	}
+
+	fmt.Printf("inputMap: %v\n", inputMap)
+
+	// Create Rego for query and evaluation
+	regoQuery := rego.New(
+		rego.Query(InputPackage),
+		rego.Module(InputPolicy, string(regoPolicyCode)),
+		rego.Input(inputMap),
+	)
+
+	// Evaluate the Rego query
+	rs, err := regoQuery.Eval(context.Background())
+	if err != nil {
+		return fmt.Errorf("error evaluating Rego: %v", err)
+	}
+
+	// Print the results
+	for _, result := range rs {
+		if len(result.Expressions) > 0 {
+			keys := result.Expressions[0].Value.(map[string]interface{})
+			for key, value := range keys {
+				if value != true {
+					fmt.Printf("Policy: %s failed\n", key)
+				} else {
+					fmt.Printf("Policy: %s passed\n", key)
+				}
+			}
+		} else {
+			fmt.Println("No policies passed or evaluated")
+		}
 	}
 
 	return nil

@@ -33,5 +33,3 @@ dockerfile:
   - user: "$APP_USER"
   - entrypoint:
     - "./myapp"
-  - cmd:
-    - "./myapp"

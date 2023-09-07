@@ -18,4 +18,3 @@
   COPY --from=builder $APP_HOME/myapp $APP_HOME/myapp
   USER $APP_USER
   ENTRYPOINT ["./myapp"]
-  CMD ["./myapp"]
