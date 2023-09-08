@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -58,7 +59,7 @@ func main() {
 		log.Error("Error writing Dockerfile:", err)
 		return
 	}
-	log.Printf("Generated Dockerfile saved to: %s\n", outputPath)
+	fmt.Printf("Generated Dockerfile saved to: %s\n", outputPath)
 
 	err = validate.ValidateDockerfile(string(outputData), validate.DockerfilePolicy)
 	// fmt.Printf("Dockerfile JSON: %s\n", generatedDockerfileContent)
@@ -66,6 +67,6 @@ func main() {
 		log.Error("Dockerfile validation failed:", err)
 		return
 	} else {
-		log.Printf("Dockerfile validation succeeded!")
+		fmt.Printf("Dockerfile validation succeeded!")
 	}
 }

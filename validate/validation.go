@@ -92,7 +92,7 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 				if value != true {
 					log.Errorf("Dockerfile validation policy: %s failed\n", key)
 				} else {
-					log.Printf("Dockerfile validation policy: %s passed\n", key)
+					fmt.Printf("Dockerfile validation policy: %s passed\n", key)
 				}
 			}
 		} else {
