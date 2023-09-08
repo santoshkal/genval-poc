@@ -60,15 +60,16 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 
 	jsonData, err := json.Marshal(dockerfileInstructions)
 	if err != nil {
-		log.Error("Error converting to JSON:", err)
-		return nil
+		log.WithError(err).Error("Error converting to JSON:", err)
+		return errors.New("error converting to JSON")
 	}
 
 	var commands []map[string]string
 	err = json.Unmarshal([]byte(jsonData), &commands)
 	if err != nil {
-		log.Error("Error:", err)
-		return err
+		errWithContext := fmt.Errorf("error converting JSON to map: %v", err)
+		log.WithError(err).Error(errWithContext.Error())
+		return errWithContext
 	}
 
 	// Create regoQuery for evaluation
@@ -92,7 +93,7 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 				if value != true {
 					log.Errorf("Dockerfile validation policy: %s failed\n", key)
 				} else {
-					fmt.Printf("Dockerfile validation policy: %s passed\n", key)
+					log.Infof("Dockerfile validation policy: %s passed\n", key)
 				}
 			}
 		} else {

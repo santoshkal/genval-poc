@@ -3,6 +3,7 @@ package validate
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -41,25 +42,30 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	// Parse the YAML content
 	dockerfileYAML, err := ParseYAML(yamlContent)
 	if err != nil {
-		return fmt.Errorf("error parsing YAML: %v", err)
+		log.WithError(err).Error("Error parsing YAML.")
+		return errors.New("error parsing YAML")
 	}
 
 	// Read Rego policy code from file
 	regoPolicyCode, err := os.ReadFile(regoPolicyPath)
 	if err != nil {
-		return fmt.Errorf("error reading rego policy: %v", err)
+		log.WithError(err).Error("Error reading rego policy.")
+		return errors.New("error reading rego policy")
 	}
 
 	// Convert the dockerfileYAML struct to a map for rego input
 	inputMap := make(map[string]interface{})
 	yamlBytes, err := json.Marshal(dockerfileYAML)
 	if err != nil {
-		return fmt.Errorf("error converting dockerfileYAML to JSON: %v", err)
+		log.WithError(err).Error("Error converting dockerfileYAML to JSON.")
+		return errors.New("error converting dockerfileYAML to JSON")
 	}
 
 	err = json.Unmarshal(yamlBytes, &inputMap)
 	if err != nil {
-		return fmt.Errorf("error converting JSON to map: %v", err)
+		errWithContext := fmt.Errorf("error converting JSON to map: %v", err)
+		log.WithError(err).Error(errWithContext.Error())
+		return errWithContext
 	}
 
 	// fmt.Printf("inputMap: %v\n", inputMap)
@@ -83,14 +89,14 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 			keys := result.Expressions[0].Value.(map[string]interface{})
 			for key, value := range keys {
 				if value != true {
-					log.Printf("Policy: %s failed\n", key)
+					log.Errorf("Policy: %s failed\n", key)
 					return fmt.Errorf("policy %s failed", key)
 				} else {
-					fmt.Printf("Policy: %s passed\n", key)
+					log.Infof("Policy: %s passed\n", key)
 				}
 			}
 		} else {
-			log.Errorf("No policies passed or evaluated")
+			log.Error("No policies passed or evaluated")
 		}
 	}
 
