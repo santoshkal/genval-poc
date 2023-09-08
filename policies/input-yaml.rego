@@ -5,7 +5,7 @@ default check_multi_stage = false
 
 check_base_image{
 	cmd := input.Dockerfile[_].Instructions[_].from[_]
-	not contains(cmd, "cgr.dev/chainguard")
+	contains(cmd, "cgr.dev/chainguard")
 }
 
 

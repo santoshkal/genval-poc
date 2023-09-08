@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/open-policy-agent/opa/rego"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -82,14 +83,14 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 			keys := result.Expressions[0].Value.(map[string]interface{})
 			for key, value := range keys {
 				if value != true {
-					fmt.Printf("Policy: %s failed\n", key)
+					log.Printf("Policy: %s failed\n", key)
 					return fmt.Errorf("policy %s failed", key)
 				} else {
-					fmt.Printf("Policy: %s passed\n", key)
+					log.Printf("Policy: %s passed\n", key)
 				}
 			}
 		} else {
-			fmt.Println("No policies passed or evaluated")
+			log.Errorf("No policies passed or evaluated")
 		}
 	}
 

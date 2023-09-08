@@ -1,6 +1,6 @@
 module github.com/santoshkal/genval-poc
 
-go 1.20
+go 1.21.1
 
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible

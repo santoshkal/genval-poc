@@ -3,12 +3,13 @@ package validate
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/open-policy-agent/opa/rego"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -59,14 +60,14 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 
 	jsonData, err := json.Marshal(dockerfileInstructions)
 	if err != nil {
-		fmt.Println("Error converting to JSON:", err)
+		log.Error("Error converting to JSON:", err)
 		return nil
 	}
 
 	var commands []map[string]string
 	err = json.Unmarshal([]byte(jsonData), &commands)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Error("Error:", err)
 		return err
 	}
 
@@ -89,19 +90,19 @@ func ValidateDockerfile(dockerfileContent string, regoPolicyPath string) error {
 			keys := result.Expressions[0].Value.(map[string]interface{})
 			for key, value := range keys {
 				if value != true {
-					fmt.Printf("Dockerfile validation policy: %s failed\n", key)
+					log.Errorf("Dockerfile validation policy: %s failed\n", key)
 				} else {
-					fmt.Printf("Dockerfile validation policy: %s passed\n", key)
+					log.Printf("Dockerfile validation policy: %s passed\n", key)
 				}
 			}
 		} else {
-			fmt.Println("No policies passed")
+			log.Error("No policies passed")
 		}
 	}
 
 	if err != nil {
-		return fmt.Errorf("error evaluating Rego: %v", err)
+		log.WithError(err).Error("Error evaluating Rego.")
+		return errors.New("error evaluating Rego")
 	}
-
 	return nil
 }

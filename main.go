@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/santoshkal/genval-poc/generate"
 	"github.com/santoshkal/genval-poc/validate"
@@ -13,9 +13,13 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Println("Usage: go run main.go input.yaml output.Dockerfile")
+		log.Debug("Usage: go run main.go input.yaml output.Dockerfile")
 		return
 	}
+
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 
 	inputPath := os.Args[1]
 	outputPath := os.Args[2]
@@ -30,7 +34,7 @@ func main() {
 
 	err := generate.ParseInputFile(inputPath, &data)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Error("Error:", err)
 		return
 	}
 
@@ -51,17 +55,17 @@ func main() {
 	outputData := []byte(dockerfileContent)
 	err = os.WriteFile(outputPath, outputData, 0644)
 	if err != nil {
-		fmt.Println("Error writing Dockerfile:", err)
+		log.Error("Error writing Dockerfile:", err)
 		return
 	}
-	fmt.Printf("Generated Dockerfile saved to: %s\n", outputPath)
+	log.Printf("Generated Dockerfile saved to: %s\n", outputPath)
 
 	err = validate.ValidateDockerfile(string(outputData), validate.DockerfilePolicy)
 	// fmt.Printf("Dockerfile JSON: %s\n", generatedDockerfileContent)
 	if err != nil {
-		fmt.Println("Dockerfile validation failed:", err)
+		log.Error("Dockerfile validation failed:", err)
 		return
 	} else {
-		fmt.Println("Dockerfile validation succeeded!")
+		log.Printf("Dockerfile validation succeeded!")
 	}
 }

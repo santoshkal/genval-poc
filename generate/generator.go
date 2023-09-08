@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/go-yaml/yaml"
 )
 
@@ -62,7 +64,7 @@ func GenerateDockerfileContent(data *struct {
 		for _, instruction := range instructions {
 			for key, value := range instruction {
 				if key == "FROM" && len(key) > 1 {
-					fmt.Println("Can not have more than one FROM instruction")
+					log.Printf("Can not have more than one FROM instruction")
 				}
 				instructionLines := formatInstruction(key, value)
 				if len(instructionLines) > 0 {
