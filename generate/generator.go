@@ -13,6 +13,17 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
+// DockerfileStage represents each stage in a Dockerfile with its associated instructions.
+type DockerfileStage struct {
+	Stage        int                      `yaml:"stage"`
+	Instructions []map[string]interface{} `yaml:"instructions"`
+}
+
+// DockerfileContent holds the entirety of the Dockerfile data structure.
+type DockerfileContent struct {
+	Dockerfile []DockerfileStage `yaml:"dockerfile"`
+}
+
 // ParseInputFile reads an input file and unmarshals its content into the provided data struct.
 func ParseInputFile(filename string, data interface{}) error {
 	fileExtension := filepath.Ext(filename)
@@ -39,33 +50,27 @@ func ParseInputFile(filename string, data interface{}) error {
 	return nil
 }
 
-func GenerateDockerfileContent(data *struct {
-	Dockerfile []struct {
-		Stage        int                      `yaml:"stage"`
-		Instructions []map[string]interface{} `yaml:"instructions"`
-	} `yaml:"dockerfile"`
-}) string {
+func GenerateDockerfileContent(data *DockerfileContent) string {
 	var dockerfileContent strings.Builder
 
 	for i, stageData := range data.Dockerfile {
-		stageNumber := stageData.Stage
-		instructions := stageData.Instructions
-
 		// Add a blank line before each STAGE
 		if i > 0 {
 			dockerfileContent.WriteString("\n")
 		}
 
-		if stageNumber != 0 {
+		if stageNumber := stageData.Stage; stageNumber >= 0 {
 			dockerfileContent.WriteString(fmt.Sprintf("# STAGE %d\n", stageNumber))
 		}
 
 		lastInstruction := ""
-		for _, instruction := range instructions {
+		for _, instruction := range stageData.Instructions {
 			for key, value := range instruction {
-				if key == "FROM" && len(key) > 1 {
-					log.Printf("Can not have more than one FROM instruction")
+				if key == "FROM" && lastInstruction == "FROM" {
+					log.Errorf("Can not have more than one FROM instruction")
+					continue
 				}
+
 				instructionLines := formatInstruction(key, value)
 				if len(instructionLines) > 0 {
 					if key == "RUN" || key == "COPY" {

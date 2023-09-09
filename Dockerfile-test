@@ -1,8 +1,9 @@
+# STAGE 0
   FROM cgr.dev/chainguard/go:latest as builder
   ENV APP_HOME=/app
   RUN useradd -m -s /bin/bash -d $APP_HOME myappuser
   WORKDIR $APP_HOME
-  RUN apt-get update \
+  RUN --no-cache apt-get update \
       && apt-get clean \
       && go mod download
   COPY go.mod go.sum $APP_HOME/

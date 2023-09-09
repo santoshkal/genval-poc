@@ -1,7 +1,7 @@
 dockerfile:
 - stage: 0
   instructions:
-  - from:
+  - from: 
     - "cgr.dev/chainguard/go:latest as builder"
   - env:
     - "APP_HOME=/app"
@@ -10,7 +10,7 @@ dockerfile:
   - workdir:
     - "$APP_HOME"
   - run:
-    - apt-get update
+    - --no-cache apt-get update
     - apt-get clean
     - go mod download
   - copy:

@@ -26,12 +26,7 @@ func main() {
 	outputPath := os.Args[2]
 
 	// Use ParseInputFile to read and unmarshal the input file
-	var data struct {
-		Dockerfile []struct {
-			Stage        int                      `yaml:"stage"`
-			Instructions []map[string]interface{} `yaml:"instructions"`
-		} `yaml:"dockerfile"`
-	}
+	var data generate.DockerfileContent
 
 	err := generate.ParseInputFile(inputPath, &data)
 	if err != nil {
@@ -67,6 +62,6 @@ func main() {
 		log.Error("Dockerfile validation failed:", err)
 		return
 	} else {
-		fmt.Printf("Dockerfile validation succeeded!")
+		fmt.Printf("Dockerfile validation succeeded!\n")
 	}
 }

@@ -17,30 +17,30 @@ const (
 	InputPackage = "data.validate_input"
 )
 
-type DockerInstruction map[string][]string
+type InputInstruction map[string][]string
 
-type DockerStage struct {
-	Instructions []DockerInstruction `yaml:"instructions"`
-	Stage        int                 `yaml:"stage"`
+type InputStage struct {
+	Instructions []InputInstruction `yaml:"instructions"`
+	Stage        int                `yaml:"stage"`
 }
 
-type DockerfileYAML struct {
-	Dockerfile []DockerStage `yaml:"dockerfile"`
+type InputYAML struct {
+	Dockerfile []InputStage `yaml:"dockerfile"`
 }
 
-func ParseYAML(yamlContent string) (*DockerfileYAML, error) {
+func ParseYAML(yamlContent string) (*InputYAML, error) {
 
-	var dockerfileYAML DockerfileYAML
-	err := yaml.Unmarshal([]byte(yamlContent), &dockerfileYAML)
+	var inputfileYAML InputYAML
+	err := yaml.Unmarshal([]byte(yamlContent), &inputfileYAML)
 	if err != nil {
 		return nil, err
 	}
-	return &dockerfileYAML, nil
+	return &inputfileYAML, nil
 }
 
 func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	// Parse the YAML content
-	dockerfileYAML, err := ParseYAML(yamlContent)
+	inputfileYAML, err := ParseYAML(yamlContent)
 	if err != nil {
 		log.WithError(err).Error("Error parsing YAML.")
 		return errors.New("error parsing YAML")
@@ -55,7 +55,7 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 
 	// Convert the dockerfileYAML struct to a map for rego input
 	inputMap := make(map[string]interface{})
-	yamlBytes, err := json.Marshal(dockerfileYAML)
+	yamlBytes, err := json.Marshal(inputfileYAML)
 	if err != nil {
 		log.WithError(err).Error("Error converting dockerfileYAML to JSON.")
 		return errors.New("error converting dockerfileYAML to JSON")
@@ -89,14 +89,14 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 			keys := result.Expressions[0].Value.(map[string]interface{})
 			for key, value := range keys {
 				if value != true {
-					log.Errorf("Policy: %s failed\n", key)
-					return fmt.Errorf("policy %s failed", key)
+					log.Errorf("Input Yaml policy: %s failed\n", key)
+					return fmt.Errorf("Input Yaml policy %s failed", key)
 				} else {
-					log.Infof("Policy: %s passed\n", key)
+					fmt.Printf("Input Yaml policy: %s passed\n", key)
 				}
 			}
 		} else {
-			log.Error("No policies passed or evaluated")
+			log.Error("No input policies passed or evaluated")
 		}
 	}
 
