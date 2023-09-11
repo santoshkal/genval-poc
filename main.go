@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/santoshkal/genval-poc/generate"
+	"github.com/santoshkal/genval-poc/parser"
 	"github.com/santoshkal/genval-poc/validate"
 )
 
@@ -28,7 +29,7 @@ func main() {
 	// Use ParseInputFile to read and unmarshal the input file
 	var data generate.DockerfileContent
 
-	err := generate.ParseInputFile(inputPath, &data)
+	err := parser.ReadAndParseFile(inputPath, &data)
 	if err != nil {
 		log.Error("Error:", err)
 		return

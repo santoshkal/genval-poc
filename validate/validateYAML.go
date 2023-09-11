@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/open-policy-agent/opa/rego"
+	"github.com/santoshkal/genval-poc/parser"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -17,30 +17,30 @@ const (
 	InputPackage = "data.validate_input"
 )
 
-type InputInstruction map[string][]string
+// type InputInstruction map[string][]string
 
-type InputStage struct {
-	Instructions []InputInstruction `yaml:"instructions"`
-	Stage        int                `yaml:"stage"`
-}
+// type InputStage struct {
+// 	Instructions []InputInstruction `yaml:"instructions"`
+// 	Stage        int                `yaml:"stage"`
+// }
 
-type InputYAML struct {
-	Dockerfile []InputStage `yaml:"dockerfile"`
-}
+// type InputYAML struct {
+// 	Dockerfile []InputStage `yaml:"dockerfile"`
+// }
 
-func ParseYAML(yamlContent string) (*InputYAML, error) {
+// func ParseYAML(yamlContent string) (*InputYAML, error) {
 
-	var inputfileYAML InputYAML
-	err := yaml.Unmarshal([]byte(yamlContent), &inputfileYAML)
-	if err != nil {
-		return nil, err
-	}
-	return &inputfileYAML, nil
-}
+// 	var inputfileYAML InputYAML
+// 	err := yaml.Unmarshal([]byte(yamlContent), &inputfileYAML)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &inputfileYAML, nil
+// }
 
 func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	// Parse the YAML content
-	inputfileYAML, err := ParseYAML(yamlContent)
+	parsedYAML, err := parser.ParseYAMLContent(yamlContent)
 	if err != nil {
 		log.WithError(err).Error("Error parsing YAML.")
 		return errors.New("error parsing YAML")
@@ -55,7 +55,7 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 
 	// Convert the dockerfileYAML struct to a map for rego input
 	inputMap := make(map[string]interface{})
-	yamlBytes, err := json.Marshal(inputfileYAML)
+	yamlBytes, err := json.Marshal(parsedYAML)
 	if err != nil {
 		log.WithError(err).Error("Error converting dockerfileYAML to JSON.")
 		return errors.New("error converting dockerfileYAML to JSON")
