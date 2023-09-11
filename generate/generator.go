@@ -1,16 +1,10 @@
 package generate
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/go-yaml/yaml"
 )
 
 // DockerfileStage represents each stage in a Dockerfile with its associated instructions.
@@ -24,32 +18,7 @@ type DockerfileContent struct {
 	Dockerfile []DockerfileStage `yaml:"dockerfile"`
 }
 
-// ParseInputFile reads an input file and unmarshals its content into the provided data struct.
-func ParseInputFile(filename string, data interface{}) error {
-	fileExtension := filepath.Ext(filename)
-	fileExtension = strings.TrimPrefix(fileExtension, ".")
-
-	fileContent, err := os.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-
-	switch strings.ToLower(fileExtension) {
-	case "yaml", "yml":
-		err = yaml.Unmarshal(fileContent, data)
-	case "json":
-		err = json.Unmarshal(fileContent, data)
-	default:
-		return errors.New("unsupported file format: " + fileExtension)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
+// GenerateDockerfileContent generates a Dockerfile from the DockerfileContent struct.
 func GenerateDockerfileContent(data *DockerfileContent) string {
 	var dockerfileContent strings.Builder
 
