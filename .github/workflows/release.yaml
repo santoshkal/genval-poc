@@ -7,8 +7,8 @@ name: release
 # run only on tags
 on:
   push:
-    branches:
-      - '*'  
+    tags:
+      - 'v*'  # Run pn Push tag 
 
 permissions:
    contents: write # needed to write releases
@@ -40,3 +40,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
