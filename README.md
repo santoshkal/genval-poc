@@ -1,4 +1,7 @@
-# GenVal: Simplifying Dockerfile Validation and Generation
+# GenVal: 
+Verify, Generate and Validate dockerfile, K8s Manifests, Helm, Timoni, Kustomize, K8s Operators, Tekton, GitOps, K8s Infa YAML files, etc. programmatically.
+
+## Simplifying Dockerfile Validation and Generation
 
 **GenVal** is a powerful utility written in Golang that simplifies the process of Dockerfile validation and generation. Whether you're new to Docker or a seasoned pro, GenVal can help you create Dockerfiles that adhere to best practices for security and optimization.
 

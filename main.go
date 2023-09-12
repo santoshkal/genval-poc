@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/santoshkal/genval-poc/pkg/generate"
+	"github.com/santoshkal/genval-poc/pkg/parser"
+	"github.com/santoshkal/genval-poc/pkg/validate"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/santoshkal/genval-poc/generate"
-	"github.com/santoshkal/genval-poc/parser"
-	"github.com/santoshkal/genval-poc/validate"
 )
 
 // const DockerfilePolicy = "./policies/docker-file.rego"

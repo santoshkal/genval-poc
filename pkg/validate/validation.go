@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/open-policy-agent/opa/rego"
-	"github.com/santoshkal/genval-poc/parser"
+	"github.com/santoshkal/genval-poc/pkg/parser"
 	log "github.com/sirupsen/logrus"
 )
 
