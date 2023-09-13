@@ -41,14 +41,14 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: verify signatures
+      - name: verify release
         run: |
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${{ steps.goreleaser.artifacts.certificate }} \
-          --signature ${{ steps.goreleaser.artifacts.signature }} \
-           ${{ steps.goreleaser.artifacts}}
+          --cert ${{artifacts.certificate }} \
+          --signature ${{ goreleaser.artifacts.signature }} \
+           ${{ goreleaser.artifacts}}
  
           
         
