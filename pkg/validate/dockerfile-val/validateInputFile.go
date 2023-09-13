@@ -2,18 +2,21 @@ package validate
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/open-policy-agent/opa/rego"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
+//go:embed inputFilePolicies.rego
+var inputPolicy []byte
+
 const (
-	InputPolicy  = "./policies/input-yaml.rego"
+	InputPolicy  = "input.rego"
 	InputPackage = "data.validate_input"
 )
 
@@ -47,11 +50,11 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	}
 
 	// Read Rego policy code from file
-	regoPolicyCode, err := os.ReadFile(regoPolicyPath)
-	if err != nil {
-		log.WithError(err).Error("Error reading rego policy.")
-		return errors.New("error reading rego policy")
-	}
+	// regoPolicyCode, err := os.ReadFile(string(inputPolicy))
+	// if err != nil {
+	// 	log.WithError(err).Error("Error reading rego policy.")
+	// 	return errors.New("error reading rego policy")
+	// }
 
 	// Convert the dockerfileYAML struct to a map for rego input
 	inputMap := make(map[string]interface{})
@@ -73,7 +76,7 @@ func ValidateYAML(yamlContent string, regoPolicyPath string) error {
 	// Create Rego for query and evaluation
 	regoQuery := rego.New(
 		rego.Query(InputPackage),
-		rego.Module(InputPolicy, string(regoPolicyCode)),
+		rego.Module(InputPolicy, string(inputPolicy)),
 		rego.Input(inputMap),
 	)
 

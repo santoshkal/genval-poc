@@ -39,12 +39,19 @@ func ParseInputFile(filename string, data interface{}) error {
 	return nil
 }
 
-func GenerateDockerfileContent(data *struct {
-	Dockerfile []struct {
-		Stage        int                      `yaml:"stage"`
-		Instructions []map[string]interface{} `yaml:"instructions"`
-	} `yaml:"dockerfile"`
-}) string {
+// DockerfileStage represents each stage in a Dockerfile with its associated instructions.
+type DockerfileStage struct {
+	Stage        int                      `yaml:"stage"`
+	Instructions []map[string]interface{} `yaml:"instructions"`
+}
+
+// DockerfileContent holds the entirety of the Dockerfile data structure.
+type DockerfileContent struct {
+	Dockerfile []DockerfileStage `yaml:"dockerfile"`
+}
+
+// GenerateDockerfileContent generates a Dockerfile from the DockerfileContent struct.
+func GenerateDockerfileContent(data *DockerfileContent) string {
 	var dockerfileContent strings.Builder
 
 	for i, stageData := range data.Dockerfile {

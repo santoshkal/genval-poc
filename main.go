@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/santoshkal/genval-poc/pkg/generate"
+	generate "github.com/santoshkal/genval-poc/pkg/generate/dockerfile-gen"
 	"github.com/santoshkal/genval-poc/pkg/parser"
-	"github.com/santoshkal/genval-poc/pkg/validate"
+	validate "github.com/santoshkal/genval-poc/pkg/validate/dockerfile-val"
 	log "github.com/sirupsen/logrus"
 )
 

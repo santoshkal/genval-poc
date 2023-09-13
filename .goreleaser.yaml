@@ -16,8 +16,7 @@ builds:
     # trims path
     - -trimpath
   ldflags:
-  #   # use commit date instead of current date as main.date
-  #   # only needed if you actually use those things in your main package, otherwise can be ignored.
+  #   # use commit date. Makes the release, checksums and signatures reproducible
     - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{ .CommitDate }}
 
 # proxies from the go mod proxy before building
