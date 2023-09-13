@@ -46,7 +46,7 @@ jobs:
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${{artifacts.certificate }} \
+          --cert ${{goreleaser.artifacts.certificate }} \
           --signature ${{ goreleaser.artifacts.signature }} \
            ${{ goreleaser.artifacts}}
  
