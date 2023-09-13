@@ -40,4 +40,9 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: verify signatures
+        run: |
+          cosign verify-blob --cert checksums.txt.pem --signature checksums.txt.sig checksums.txt 
+          
+        
       
