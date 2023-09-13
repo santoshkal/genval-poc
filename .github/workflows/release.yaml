@@ -43,11 +43,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: verify signatures
         run: |
+          certificate=$("${{ steps.goreleaser.outputs.certificate }}") # Access the certificate variable from the goreleaser step
+          signature=$("${{ steps.goreleaser.outputs.signature }}")   # Access the signature variable from the goreleaser step
+          artifact=$("${{ steps.goreleaser.outputs.artifact }}")     # Access the artifact variable from the goreleaser step
+
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${{ steps.goreleaser.outputs.certificate }} \
-          --signature ${{ steps.goreleaser.outputs.signature }} ${{ steps.goreleaser.outputs.artifact }} 
+          --cert "${certificate}" --signature "${signature}.sig" "${artifact}" 
           
         
       
