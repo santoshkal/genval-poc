@@ -42,7 +42,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: verify signatures
         run: |
-          cosign verify-blob --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
+          cosign verify-blob \
+          --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
+          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
           --cert checksums.txt.pem --signature checksums.txt.sig checksums.txt 
           
         
