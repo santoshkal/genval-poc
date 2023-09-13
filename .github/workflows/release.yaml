@@ -35,6 +35,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: goreleaser/goreleaser-action@v5          # run goreleaser
+        id: goreleaser
         with:
           version: latest
           args: release --clean
@@ -45,7 +46,8 @@ jobs:
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${certificate}} --signature ${signature}.sig ${artifact} 
+          --cert ${{ steps.goreleaser.outputs.certificate }} \
+          --signature ${{ steps.goreleaser.outputs.signature }} ${{ steps.goreleaser.outputs.artifact }} 
           
         
       
