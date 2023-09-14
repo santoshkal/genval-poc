@@ -47,24 +47,13 @@ jobs:
       - name: verify release
         run: |
           TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo ${TAG}
-          checksum_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt"
-          echo ${checksum_url}
-          cert_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem"
-          echo ${cert_url}
-          sig_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig"
-          echo ${sig_url}
-          
-          # Download the files using curl
-          curl -LO ${checksum_url}
-          curl -LO ${cert_url}
-          curl -LO ${sig_url}
-          
-          # Verify the downloaded signature
+          wget https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt
           cosign verify-blob \
-            --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
+            --certificate-identity 'https://github.com/intelops/genval/.github/workflows/release.yaml@refs/tags/${TAG}' \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-            --cert checksums.txt.pem --signature checksums.txt.sig checksums.txt
+            --cert https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem \
+            --signature https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig \
+            ./checksums.txt
           
  
           
