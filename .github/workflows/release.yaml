@@ -49,10 +49,10 @@ jobs:
           TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           wget https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt
           cosign verify-blob \
-            --certificate-identity 'https://github.com/santoshkal/genval-poc/.github/workflows/release.yaml@refs/tags/${TAG}' \
+            --certificate-identity "https://github.com/santoshkal/genval-poc/.github/workflows/release.yaml@refs/tags/${TAG}" \
             --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-            --cert https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem \
-            --signature https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig \
+            --cert "https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem" \
+            --signature "https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig" \
             ./checksums.txt
           
  
