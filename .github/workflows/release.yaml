@@ -46,12 +46,20 @@ jobs:
         run: go install -v github.com/sigstore/rekor/cmd/rekor-cli@v1.2.2
       - name: verify release
         run: |
-          uuid=$(rekor-cli search --artifact <(git rev-parse HEAD | tr -d '\n') | tail -n 1)
-          sig=$(rekor-cli get --uuid=$uuid --format=json | jq -r .Body.HashedRekordObj.signature.content)
-          cert=$(rekor-cli get --uuid=$uuid --format=json | jq -r .Body.HashedRekordObj.signature.publicKey.content)
-          cosign verify-blob --cert <(echo $cert | base64 --decode) --signature <(echo $sig | base64 --decode) <(git rev-parse HEAD | tr -d '\n') \
-          --certificate-oidc-issuer-regexp='^https:\/\/(github\.com\/login\/oauth|accounts\.google\.com|login\.microsoftonline\.com)' \
-          --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+          TAG=$(git describe --tags)
+          echo $TAG
+          checksum=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt)
+          echo $checksum
+          cert=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem)
+          echo $cert
+          sig=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig)
+          echo $sig
+
+
+          cosign verify-blob \
+          --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
+          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+          --cert $cert --signature $sig $checksum
  
           
         
