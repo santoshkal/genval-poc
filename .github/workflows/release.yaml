@@ -51,7 +51,7 @@ jobs:
           cert=$(rekor-cli get --uuid=$uuid --format=json | jq -r .Body.HashedRekordObj.signature.publicKey.content)
           cosign verify-blob --cert <(echo $cert | base64 --decode) --signature <(echo $sig | base64 --decode) <(git rev-parse HEAD | tr -d '\n') \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
-          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' 
  
           
         
