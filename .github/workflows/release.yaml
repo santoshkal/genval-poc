@@ -28,9 +28,7 @@ jobs:
           cache: true
       - uses: sigstore/cosign-installer@v3.1.2         # installs cosign
       - uses: anchore/sbom-action/download-syft@v0.14.3 # installs syft
-      - uses: anchore/sbom-action/publish-sbom@v0        # Publish SBOM
         with:
-          sbom-artifact-match: ".*\\.spdx$"
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
