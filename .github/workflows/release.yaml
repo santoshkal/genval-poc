@@ -43,7 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: verify release
         run: |
-          TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          TAG=$TAG=$(git describe --tags --abbrev=0)
           echo $TAG
           checksum=$(https://github.com/santoshkal/genval-poc/releases/download/$TAG/checksums.txt)
           cert=$(https://github.com/santoshkal/genval-poc/releases/download/$TAG/checksums.txt.pem)
