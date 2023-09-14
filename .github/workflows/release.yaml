@@ -46,20 +46,26 @@ jobs:
         run: go install -v github.com/sigstore/rekor/cmd/rekor-cli@v1.2.2
       - name: verify release
         run: |
-          TAG=$(git describe --tags $(git rev-list  --tags --max-count=1))
+          TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           echo ${TAG}
-          checksum=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt)
-          echo ${checksum}
-          cert=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem)
-          echo ${cert}
-          sig=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig)
-          echo ${sig}
-
-
+          checksum_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt"
+          echo ${checksum_url}
+          cert_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem"
+          echo ${cert_url}
+          sig_url="https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig"
+          echo ${sig_url}
+          
+          # Download the files using curl
+          curl -LO ${checksum_url}
+          curl -LO ${cert_url}
+          curl -LO ${sig_url}
+          
+          # Verify the downloaded signature
           cosign verify-blob \
-          --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
-          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${cert} --signature ${sig} ${checksum}
+            --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+            --cert checksums.txt.pem --signature checksums.txt.sig checksums.txt
+          
  
           
         
