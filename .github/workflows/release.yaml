@@ -46,20 +46,20 @@ jobs:
         run: go install -v github.com/sigstore/rekor/cmd/rekor-cli@v1.2.2
       - name: verify release
         run: |
-          TAG=$(git describe --tags)
+          TAG=$(git describe --tags $(git rev-list  --tags --max=count=1))
           echo $TAG
           checksum=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt)
-          echo $checksum
+          echo ${checksum}
           cert=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem)
-          echo $cert
+          echo ${cert}
           sig=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.sig)
-          echo $sig
+          echo ${sig}
 
 
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert $cert --signature $sig $checksum
+          --cert ${cert} --signature ${sig} ${checksum}
  
           
         
