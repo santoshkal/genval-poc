@@ -43,12 +43,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: verify release
         run: |
+          TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          checksum=$(https://github.com/santoshkal/genval-poc/releases/download/$TAG/checksums.txt)
+          cert=$(https://github.com/santoshkal/genval-poc/releases/download/$TAG/checksums.txt.pem)
+          sig=$(https://github.com/santoshkal/genval-poc/releases/download/$TAG/checksums.txt.sig)
+
           cosign verify-blob \
           --certificate-identity-regexp='^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          --cert ${{goreleaser.artifacts.certificate }} \
-          --signature ${{ goreleaser.artifacts.signature }} \
-           ${{ goreleaser.artifacts}}
+          --cert $cert \
+          --signature $sig \
+           $checksum
  
           
         
