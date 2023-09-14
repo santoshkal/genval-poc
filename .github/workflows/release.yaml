@@ -46,8 +46,8 @@ jobs:
         run: go install -v github.com/sigstore/rekor/cmd/rekor-cli@v1.2.2
       - name: verify release
         run: |
-          TAG=$(git describe --tags $(git rev-list  --tags --max=count=1))
-          echo $TAG
+          TAG=$(git describe --tags $(git rev-list  --tags --max-count=1))
+          echo ${TAG}
           checksum=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt)
           echo ${checksum}
           cert=$(https://github.com/santoshkal/genval-poc/releases/download/${TAG}/checksums.txt.pem)
