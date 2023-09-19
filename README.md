@@ -45,3 +45,10 @@ Replace `<path/to/input-json>` with the path to your input JSON file and `<path/
 
 GenVal simplifies Dockerfile management by automating validation and generation while ensuring that your Dockerfiles adhere to best practices. It's a valuable tool for both Docker novices and experts.
 
+## Validating the binaries using Cosign
+
+To verify the release binary, download the `checksums.txt`, the certificate `checksums.txt.pem`, and the signature `checksums.txt.sig` for your desired release.
+
+```shell
+cosign verify-blob 
+```
