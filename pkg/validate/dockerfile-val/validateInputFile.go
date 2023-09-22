@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/intelops/genval/pkg/parser"
 	"github.com/open-policy-agent/opa/rego"
+	"github.com/santoshkal/genval-poc/pkg/parser"
 	log "github.com/sirupsen/logrus"
 )
 

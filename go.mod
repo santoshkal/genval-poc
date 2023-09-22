@@ -1,4 +1,4 @@
-module github.com/intelops/genval
+module github.com/santoshkal/genval-poc
 
 go 1.21.1
 
