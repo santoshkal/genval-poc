@@ -1,0 +1,21 @@
+# STAGE 0
+  FROM cgr.dev/chainguard/python:latest-dev as builder
+  ENV APP_HOME=/app
+  WORKDIR $APP_HOME
+  RUN apk add --no-cache build-base \
+      && pip install --upgrade pip wheel
+  COPY requirements.txt .
+  RUN pip wheel --no-cache --no-deps --wheel-dir /app/wheels -r requirements.txt
+
+# STAGE 1
+  FROM cgr.dev/chainguard/python:latest
+  LABEL maintainer="your-email@example.com"
+  LABEL description="Secure Multi-stage RUST Alpine Image"
+  ENV APP_USER=myappuser
+  ENV APP_HOME=/app
+  WORKDIR $APP_HOME
+  COPY --from=builder /usr/src/myapp/target/release/myapp /usr/local/bin/
+  RUN adduser -D $APP_USER
+  USER $APP_USER
+  COPY main.py .
+  ENTRYPOINT ["python", "/$APP_HOME/main.py"]
